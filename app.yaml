@@ -1,15 +1,10 @@
-# app.yaml: The main configuration file for your Arduino App.
-# This file describes the application's metadata and properties.
-
-# The user-visible name of the application.
 name: Lidar Sweeper
-
-# The icon for the application, can be an emoji or a short string.
-icon: 📡
-
-# A list of network ports that the application exposes.
-# Example: [80, 443]
+description: ""
 ports: []
-
-# A list of bricks used by this application.
-bricks: []
+bricks:
+- arduino:dbstorage_tsstore:
+    variables:
+      DB_PASSWORD: Arduino15
+      DB_USERNAME: admin
+      INFLUXDB_ADMIN_TOKEN: 392edbf2-b8a2-481f-979d-3f188b2c05f0
+icon: 📡
