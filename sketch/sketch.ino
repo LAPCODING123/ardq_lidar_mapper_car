@@ -39,7 +39,8 @@ void setup() {
 
 void loop() {
   robocar.telemeter_health();
-  delay(500);
+  robocar.update_and_telemeter_sensors();
+  delayMicroseconds(50);
   
   // Serial.print("Bias corrected measurment: ");
   // Serial.println(lidar.distance());
