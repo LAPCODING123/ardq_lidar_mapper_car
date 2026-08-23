@@ -22,12 +22,12 @@
 #define Mapper_Car_h
 
 /*-------------------------------------
-//QWIIC I2C Bus Peripherals (I2C4)
+//QWIIC I2C Bus Peripherals (I2C4) (Wire1)
 /*Peripheral         | Address */
 /*ICM-20948 IMU      |   0x69       
 /*PCA9685 Servo Driv |   0x40 
 /---------------------------------------
-//Standard I2C2
+//Standard I2C2 (Wire)
 /*Peripheral                 | Address */
 //Garmin Lidar Lite v3       |   0x62
 
@@ -42,16 +42,46 @@
 #define OSEPP_VOLTAGE_SENSOR_SCALE_F 5 // multiply by 5 
 #define OSEPP_ADC_READ_COUNTS_TO_V 0.001007080078125F //(ADC_RESOLTION_mV/1000)*OSEPP_VOLTAGE_SENSOR_SCALE_F
 
+#define MAX_IMU_LINK_ATTEMPTS 5
+#define MAX_IMU_READ_ATTEMPTS 100
+#define IMU_MEASURES_BUFF_SIZE 100
+#define MAX_LIDAR_LINK_ATTEMPTS 5
+
+typedef struct robot_pose
+{
+    float x_vel_m_per_s;
+    float y_vel_m_per_s;
+    float z_vel_m_per_s;
+    float x_m;
+    float y_m;
+    float z_m;
+    float mag_heading;
+    float mag_pitch;
+    float mag_roll;
+    float heading_deg;
+    float pitch_deg;
+    float roll_deg;
+    float time_ms; //later add lidar actuatior
+} robot_pose;
+
 
 
 class MapperCar {
   public:
     MapperCar();
     void init();
-    int read_lidar_cm(bool bias_corretion = true);
+    int read_lidar_cm();
+    int read_lidar_cm(int bias_corretion_n_meas);
     void telemeter_health();
+    void update_and_telemeter_sensors();
+    void updateAndTelmMagData();
+    void updateAndTelmAccData();
+    void updateAndTelmGyroData();
+    void telm_IMU_Temp();
+    void update_pose();
 
   private:
+    robot_pose last_pose;
     LIDARLite lidar;
     Adafruit_ICM20948 icm_imu;
     bool lidar_online;
@@ -60,6 +90,19 @@ class MapperCar {
     int imu_error_persist_cnt;
     float battery_voltage;
     //will add in drivetrain next
+    //future work may want to refactor imu data
+    sensors_event_t mag_sample_hist[IMU_MEASURES_BUFF_SIZE];
+    long mag_sample_times_us[IMU_MEASURES_BUFF_SIZE];
+    int mag_sample_ind;
+    sensors_event_t acc_sample_hist[IMU_MEASURES_BUFF_SIZE];
+    long acc_sample_times_us[IMU_MEASURES_BUFF_SIZE];
+    int acc_sample_ind;
+    sensors_event_t gyro_sample_hist[IMU_MEASURES_BUFF_SIZE];
+    long gyro_sample_times_us[IMU_MEASURES_BUFF_SIZE];
+    int gyro_sample_ind;
+    sensors_event_t temp_sample_hist[IMU_MEASURES_BUFF_SIZE];
+    long temp_sample_times[IMU_MEASURES_BUFF_SIZE];
+    int temp_sample_ind;
     void init_imu();
     void init_lidar();
     void init_batt_voltage_sensor();
