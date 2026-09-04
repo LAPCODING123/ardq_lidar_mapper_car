@@ -1,3 +1,4 @@
+#include <cstdint>
 /*------------------------------------------------------------------------------
 
   Garmin Lidar Car Arduino Library
@@ -16,6 +17,7 @@
 #include <Adafruit_ICM20X.h>
 #include <Adafruit_ICM20948.h>
 #include <Adafruit_Sensor.h>
+#include <Adafruit_PWMServoDriver.h>
 #include <Arduino_RouterBridge.h>
 
 #ifndef Mapper_Car_h
@@ -46,6 +48,22 @@
 #define MAX_IMU_READ_ATTEMPTS 100
 #define IMU_MEASURES_BUFF_SIZE 100
 #define MAX_LIDAR_LINK_ATTEMPTS 5
+#define SERVO_UPDATE_FREQ_HZ 50
+
+#define PITCH_SERVO_DRIVER_PIN 0
+#define YAW_SERVO_DRIVER_PIN 1
+
+
+#define PITCH_DIGITAL_OFFSET 0
+#define YAW_DIGITAL_OFFSET 0
+
+#define YAW_MAX_RANGE 270
+#define PITCH_MAX_RANGE 180
+
+//defining stuff this way allows both actuators to be accurate within 0.1318359375 deg,
+#define PITCH_TOL_DIG 3
+
+#define YAW_TOL_DIG 2 //allow values withn 
 
 typedef struct robot_pose
 {
@@ -62,6 +80,8 @@ typedef struct robot_pose
     float pitch_deg;
     float roll_deg;
     float time_ms; //later add lidar actuatior
+    uint16_t lidar_pitch_dig;
+    uint16_t lidar_yaw_dig;
 } robot_pose;
 
 
@@ -72,18 +92,24 @@ class MapperCar {
     void init();
     int read_lidar_cm();
     int read_lidar_cm(int bias_corretion_n_meas);
-    void telemeter_health();
+    void telemeter_health(unsigned long updateRate_ms);
     void update_and_telemeter_sensors();
     void updateAndTelmMagData();
     void updateAndTelmAccData();
     void updateAndTelmGyroData();
     void telm_IMU_Temp();
     void update_pose();
+    void lidarActuatetoTarget(double pitch_ang, double yaw_ang, double pitch_speed_dps, double yaw_speed_dps);
+    void updateActuatorState(unsigned long updateRate_ms);
+    void setTargetPose(robot_pose *target_pose_new);
+    void telemeterLidarPose(unsigned long updateRate_ms);
 
   private:
     robot_pose last_pose;
+    robot_pose target_pose;
     LIDARLite lidar;
     Adafruit_ICM20948 icm_imu;
+    Adafruit_PWMServoDriver lidarActDriver;
     bool lidar_online;
     int lidar_error_persist_cnt;
     bool imu_online;
@@ -106,8 +132,17 @@ class MapperCar {
     void init_imu();
     void init_lidar();
     void init_batt_voltage_sensor();
+    void initLidarAcuator();
     float update_vehicle_vel(float new_accel);
     float check_batt_V();
+    bool setPWMPulseus(uint8_t n, double pulse);
+    //sets the acuator to a position
+    bool setLidarAcuatorPosition(double pitch_deg, double yaw_deg);
+    bool setLidarAcuatorPosition(uint16_t pitch_digital, uint16_t yaw_digital);
+    uint16_t angleToDigitalServoVal(double angle,double angle_range, double offset=0);
+    double digitalServoValtoAngle(uint16_t digital_val, uint16_t max_digital_val, uint16_t offset);
+    int last_lidar_distance_cm;
+
     
 };
 
