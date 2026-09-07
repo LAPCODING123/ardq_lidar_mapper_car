@@ -368,8 +368,11 @@ bool MapperCar::setLidarAcuatorPosition(double pitch_deg, double yaw_deg)
 bool MapperCar::setLidarAcuatorPosition(uint16_t pitch_digital, uint16_t yaw_digital)
 {
   uint8_t cmd_success = 1;
-  cmd_success &= !lidarActDriver.setPWM(PITCH_SERVO_DRIVER_PIN, 0, pitch_digital);
-  cmd_success &= !lidarActDriver.setPWM(YAW_SERVO_DRIVER_PIN, 0, yaw_digital);
+ // cmd_success &= !lidarActDriver.setPWM(PITCH_SERVO_DRIVER_PIN, 0, pitch_digital);
+  //cmd_success &= !lidarActDriver.setPWM(YAW_SERVO_DRIVER_PIN, 0, yaw_digital);
+
+  lidarActDriver.setPWM(0, 0, 630); //2096 //220 -> 103 deg //150 is 93.5 deg (800 us) 143 is 88.5 deg
+  
   if(cmd_success)
   {
      last_pose.lidar_pitch_dig = pitch_digital;
