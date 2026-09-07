@@ -134,11 +134,12 @@ void MapperCar::telemeter_health(unsigned long updateRate_ms)
   //unsigned subtraciton overflow will automatically make rollover a non issue
   if(millis() - last_time >= updateRate_ms){
      //algorithm
-    std::map<String, int> health_channels{{"time_ms", 0},{"batt_mV", 0}, {"lidar_online", 0}, {"imu_online", 0}};
+    std::map<String, int> health_channels{{"time_ms", 0},{"batt_mV", 0}, {"lidar_online", 0}, {"imu_online", 0},{"lidar_act_online", 0}};
     health_channels["batt_mV"] = (int) (check_batt_V() * 1000 );
     health_channels["lidar_online"] = (int) lidar_online;
     health_channels["imu_online"] = (int) imu_online;
     health_channels["time_ms"] = (int) millis();
+    health_channels["lidar_act_online"] = lidar_actuator_online;
     Bridge.notify("log_car_health_cb", health_channels); 
     last_time = millis();
   }
@@ -335,7 +336,7 @@ void MapperCar::update_and_telemeter_sensors()
 void MapperCar::initLidarAcuator()
 {
   lidarActDriver = Adafruit_PWMServoDriver(SERVO_DRIVER_PCA9685_I2C4_ADDR, Wire1);
-  lidarActDriver.begin(); //start device
+  lidar_actuator_online = lidarActDriver.begin(); //start device
   lidarActDriver.setPWMFreq(SERVO_UPDATE_FREQ_HZ); //guess 50 hz updates
   
 }
@@ -367,12 +368,17 @@ bool MapperCar::setLidarAcuatorPosition(double pitch_deg, double yaw_deg)
 bool MapperCar::setLidarAcuatorPosition(uint16_t pitch_digital, uint16_t yaw_digital)
 {
   uint8_t cmd_success = 1;
-  cmd_success &= lidarActDriver.setPWM(PITCH_SERVO_DRIVER_PIN, 0, pitch_digital);
-  cmd_success &= lidarActDriver.setPWM(YAW_SERVO_DRIVER_PIN, 0, yaw_digital);
+  cmd_success &= !lidarActDriver.setPWM(PITCH_SERVO_DRIVER_PIN, 0, pitch_digital);
+  cmd_success &= !lidarActDriver.setPWM(YAW_SERVO_DRIVER_PIN, 0, yaw_digital);
   if(cmd_success)
   {
      last_pose.lidar_pitch_dig = pitch_digital;
      last_pose.lidar_yaw_dig = yaw_digital;
+     lidar_actuator_online = 1;
+  }
+  else
+  {
+    lidar_actuator_online = 0;
   }
   return (bool) cmd_success;
 }
@@ -477,5 +483,4 @@ bool MapperCar::lidarActuatetoTarget(double pitch_ang, double yaw_ang, double pi
   
   return done;
 }
-
 
