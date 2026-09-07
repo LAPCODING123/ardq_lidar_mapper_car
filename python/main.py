@@ -37,6 +37,13 @@ def log_gyro_cb(gyro_channels: dict):
 def log_imu_temp_cb(imu_temp_channels: dict):
     log_dict_to_db(vehicle_run_db,imu_temp_channels,"imu_temp")
 
+def log_imu_temp_cb(imu_temp_channels: dict):
+    log_dict_to_db(vehicle_run_db,imu_temp_channels,"imu_temp")
+
+def log_lidar_cb(lidar_pose_channels: dict):
+    log_dict_to_db(vehicle_run_db,lidar_pose_channels, "lidar")
+
+    
 # def loop():
 #     """This function is called repeatedly by the App framework."""
 #     # You can replace this with any code you want your App to run repeatedly.
@@ -47,6 +54,7 @@ Bridge.provide("log_mag_cb", log_mag_cb)
 Bridge.provide("log_acc_cb", log_acc_cb)
 Bridge.provide("log_gyro_cb", log_gyro_cb)
 Bridge.provide("log_imu_temp_cb", log_imu_temp_cb)
+Bridge.provide("log_lidar_cb", log_lidar_cb)
 
 print("Starting app")
 # See: https://docs.arduino.cc/software/app-lab/tutorials/getting-started/#app-run
