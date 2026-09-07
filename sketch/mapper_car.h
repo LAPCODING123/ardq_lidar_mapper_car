@@ -51,10 +51,10 @@
 #define SERVO_UPDATE_FREQ_HZ 50
 
 #define PITCH_SERVO_DRIVER_PIN 0
-#define YAW_SERVO_DRIVER_PIN 1
+#define YAW_SERVO_DRIVER_PIN 1 //confirmed
 
 
-#define PITCH_DIGITAL_OFFSET 0
+#define PITCH_DIGITAL_OFFSET 144 //zero is 144 cts
 #define YAW_DIGITAL_OFFSET 0
 
 #define YAW_MAX_RANGE 270
@@ -64,6 +64,8 @@
 #define PITCH_TOL_DIG 3
 
 #define YAW_TOL_DIG 2 //allow values withn 
+
+#define MAX_LIDAR_ACUATOR_ONLINE_ATTEMPS 5
 
 typedef struct robot_pose
 {
@@ -82,6 +84,8 @@ typedef struct robot_pose
     float time_ms; //later add lidar actuatior
     uint16_t lidar_pitch_dig;
     uint16_t lidar_yaw_dig;
+    double lidar_pitch_rate_dps;
+    double lidar_yaw_rate_dps;
 } robot_pose;
 
 
@@ -99,7 +103,6 @@ class MapperCar {
     void updateAndTelmGyroData();
     void telm_IMU_Temp();
     void update_pose();
-    void lidarActuatetoTarget(double pitch_ang, double yaw_ang, double pitch_speed_dps, double yaw_speed_dps);
     void updateActuatorState(unsigned long updateRate_ms);
     void setTargetPose(robot_pose *target_pose_new);
     void telemeterLidarPose(unsigned long updateRate_ms);
@@ -113,6 +116,7 @@ class MapperCar {
     bool lidar_online;
     int lidar_error_persist_cnt;
     bool imu_online;
+    bool lidar_actuator_online;
     int imu_error_persist_cnt;
     float battery_voltage;
     //will add in drivetrain next
@@ -141,10 +145,21 @@ class MapperCar {
     bool setLidarAcuatorPosition(uint16_t pitch_digital, uint16_t yaw_digital);
     uint16_t angleToDigitalServoVal(double angle,double angle_range, double offset=0);
     double digitalServoValtoAngle(uint16_t digital_val, uint16_t max_digital_val, uint16_t offset);
+    bool lidarActuatetoTarget(double pitch_ang, double yaw_ang, double pitch_speed_dps, double yaw_speed_dps);
     int last_lidar_distance_cm;
 
     
 };
+
+//2096/9.4ms = 0.22 counts / us at 50 Hz refresh rate
+
+//https://www.yahboom.net/study/High-Torque-Servo
+
+//need to use 110 counts for the 0degees  (0.22 * 500 us)
+//550 counts is 0.22* 2500 = 550
+//550-110 = 440 count range
+
+//
 
 
 
