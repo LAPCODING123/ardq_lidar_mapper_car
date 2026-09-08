@@ -361,18 +361,15 @@ bool MapperCar::setPWMPulseus(uint8_t n, double pulse)
 //180/4096: theorittica pitch roelesiton of 0.0439 degees
 bool MapperCar::setLidarAcuatorPosition(double pitch_deg, double yaw_deg)
 {
-   return setLidarAcuatorPosition(angleToDigitalServoVal(pitch_deg, YAW_MAX_RANGE),
+   return setLidarAcuatorPositionDig(angleToDigitalServoVal(pitch_deg, YAW_MAX_RANGE),
                                  angleToDigitalServoVal(yaw_deg, PITCH_MAX_RANGE));
 }
 
-bool MapperCar::setLidarAcuatorPosition(uint16_t pitch_digital, uint16_t yaw_digital)
+bool MapperCar::setLidarAcuatorPositionDig(uint16_t pitch_digital, uint16_t yaw_digital)
 {
   uint8_t cmd_success = 1;
- // cmd_success &= !lidarActDriver.setPWM(PITCH_SERVO_DRIVER_PIN, 0, pitch_digital);
-  //cmd_success &= !lidarActDriver.setPWM(YAW_SERVO_DRIVER_PIN, 0, yaw_digital);
-
-  lidarActDriver.setPWM(0, 0, 630); //2096 //220 -> 103 deg //150 is 93.5 deg (800 us) 143 is 88.5 deg
-  
+  cmd_success &= !lidarActDriver.setPWM(PITCH_SERVO_DRIVER_PIN, 0, pitch_digital);
+  cmd_success &= !lidarActDriver.setPWM(YAW_SERVO_DRIVER_PIN, 0, yaw_digital);
   if(cmd_success)
   {
      last_pose.lidar_pitch_dig = pitch_digital;
@@ -381,6 +378,7 @@ bool MapperCar::setLidarAcuatorPosition(uint16_t pitch_digital, uint16_t yaw_dig
   }
   else
   {
+    Serial.println("lidar act failure");
     lidar_actuator_online = 0;
   }
   return (bool) cmd_success;
@@ -390,13 +388,36 @@ bool MapperCar::setLidarAcuatorPosition(uint16_t pitch_digital, uint16_t yaw_dig
 void MapperCar::updateActuatorState(unsigned long updateRate_ms)
 {
   static unsigned long last_time = millis();
+  static unsigned long traj_start = millis();
+  unsigned long curr_time;
+  static int i = 0;
   //unsigned subtraciton overflow will automatically make rollover a non issue
   if(millis() - last_time >= updateRate_ms)
   {
+     setLidarAcuatorPositionDig( PITCH_NINETY_DEG_DIG, YAW_NINETY_DEG_DIG);
+    //buggy trajectort logic example just to prove telemetery works. can correct at next opporutnity into funciton
+    // //set lidar actuate to target
+    // if(millis() >  500*i + traj_start)
+    // {
+    //   i++;
+    //   if(i > 200)
+    //   {
+    //     i = 0;
+    //     traj_start = millis();
+    //     setLidarAcuatorPositionDig( PITCH_NINETY_DEG_DIG, YAW_NINETY_DEG_DIG);
+    //   }
+    //   else if(i > 100)
+    //   {
+    //     setLidarAcuatorPositionDig( PITCH_NINETY_DEG_DIG + (i-100), YAW_NINETY_DEG_DIG  + (i-100));
+    //   }
+    //   else
+    //   {
+    //     setLidarAcuatorPositionDig( PITCH_NINETY_DEG_DIG - i, YAW_NINETY_DEG_DIG  - i);
+    //   }
+    // }
+
     last_time = millis();
-    //can do  link check logic here?
-    //set lidar actuate to target
-    setLidarAcuatorPosition(0.5, 0.5);
+    
   }
 }
 
