@@ -8,5 +8,6 @@ profiles:
       - Adafruit BusIO (1.17.4)
       - Adafruit ICM20X (2.0.7)
       - Adafruit Unified Sensor (1.1.15)
+      - Adafruit PWM Servo Driver Library (3.0.3)
 
 default_profile: default
