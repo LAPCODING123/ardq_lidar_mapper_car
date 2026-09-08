@@ -50,12 +50,15 @@
 #define MAX_LIDAR_LINK_ATTEMPTS 5
 #define SERVO_UPDATE_FREQ_HZ 50
 
-#define PITCH_SERVO_DRIVER_PIN 0
-#define YAW_SERVO_DRIVER_PIN 1 //confirmed
+#define PITCH_SERVO_DRIVER_PIN 1 //pitch is up and down
+#define YAW_SERVO_DRIVER_PIN 0  //yaw is left and right
 
 
 #define PITCH_DIGITAL_OFFSET 144 //zero is 144 cts
-#define YAW_DIGITAL_OFFSET 0
+#define PITCH_NINETY_DEG_DIG 363 //zero is 144 cts
+#define YAW_DIGITAL_OFFSET 81 //zero is 85?
+#define YAW_NINETY_DEG_DIG 228 //229.5 exactly
+#define YAW_ONEEIGHTY_DEG_DIGITAL 378
 
 #define YAW_MAX_RANGE 270
 #define PITCH_MAX_RANGE 180
@@ -142,7 +145,7 @@ class MapperCar {
     bool setPWMPulseus(uint8_t n, double pulse);
     //sets the acuator to a position
     bool setLidarAcuatorPosition(double pitch_deg, double yaw_deg);
-    bool setLidarAcuatorPosition(uint16_t pitch_digital, uint16_t yaw_digital);
+    bool setLidarAcuatorPositionDig(uint16_t pitch_digital, uint16_t yaw_digital);
     uint16_t angleToDigitalServoVal(double angle,double angle_range, double offset=0);
     double digitalServoValtoAngle(uint16_t digital_val, uint16_t max_digital_val, uint16_t offset);
     bool lidarActuatetoTarget(double pitch_ang, double yaw_ang, double pitch_speed_dps, double yaw_speed_dps);
