@@ -29,18 +29,21 @@ void setup() {
   // put your setup code here, to run once:
  // sweeper.attach(SWEEPER_PIN);
   Serial.begin(9600);
+  delay(1000);
   
  // sweeper.write(166);  
   // lidar.begin(0, true);
   // lidar.configure(0);
+  Serial.println("test in init");
   robocar.init();
 
 }
 
 void loop() {
-  robocar.telemeter_health();
+  robocar.telemeter_health(300);
   robocar.update_and_telemeter_sensors();
-  delayMicroseconds(50);
+  robocar.updateActuatorState(100); //20 ms updates
+  robocar.telemeterLidarPose(20);
   
   // Serial.print("Bias corrected measurment: ");
   // Serial.println(lidar.distance());
